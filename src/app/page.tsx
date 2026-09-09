@@ -127,8 +127,7 @@ export default function Portfolio() {
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-white font-sans selection:bg-purple-500/30 relative overflow-x-hidden">
       
-      <InteractiveAura />
-
+      
       {/* Progress Bar */}
       <motion.div 
         className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-purple-500 transform origin-left z-50"
@@ -200,38 +199,7 @@ export default function Portfolio() {
         )}
       </nav>
 
-      {/* Dynamic Background Particles (3D space) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transformStyle: "preserve-3d" }}>
-        {isMounted && [...Array(20)].map((_, i) => {
-          // Simple stable pseudo-random based on index to fix hydration issues
-          const rand1 = Math.abs(Math.sin(i * 10)) % 1;
-          const rand2 = Math.abs(Math.cos(i * 20)) % 1;
-          const rand3 = Math.abs(Math.sin(i * 30)) % 1;
-          const rand4 = Math.abs(Math.cos(i * 40)) % 1;
-          const rand5 = Math.abs(Math.sin(i * 50)) % 1;
-          return (
-          <motion.div
-            key={i}
-            className="absolute bg-white rounded-full opacity-20"
-            style={{
-              width: rand1 * 6 + 1 + 'px',
-              height: rand1 * 6 + 1 + 'px',
-              top: rand2 * 100 + '%',
-              left: rand3 * 100 + '%',
-              translateZ: rand4 * 500 - 250 + 'px',
-            }}
-            animate={{
-              y: [0, rand5 * -200 - 50],
-              opacity: [0.1, 0.6, 0],
-            }}
-            transition={{
-              duration: rand1 * 5 + 5,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          />
-        )})}
-      </div>
+      {/* Background Glowing Orbs (Static for performance) */}
 
       {/* Background Glowing Orbs */}
       <motion.div 
@@ -668,7 +636,7 @@ export default function Portfolio() {
                 whileHover={{ rotateX: 10, rotateY: -10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
                 transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
               >
-                <Image src="/api/image?name=goverdhan" unoptimized={true} alt="Goverdhan Food Product" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/goverdhan.png" alt="Goverdhan Food Product" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
               </motion.div>
             </div>
 
@@ -724,7 +692,7 @@ export default function Portfolio() {
                 whileHover={{ rotateX: 10, rotateY: 10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
                 transition={{ y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
               >
-                <Image src="/api/image?name=slangera" unoptimized={true} alt="Slang Era Marketing" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/slangera.png" alt="Slang Era Marketing" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
               </motion.div>
             </div>
 
