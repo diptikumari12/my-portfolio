@@ -1,70 +1,96 @@
 "use client";
 
 import { motion, useScroll, useSpring, useMotionValue, useTransform } from "framer-motion";
-import { Code, Globe, Mail, ExternalLink, User, Terminal, ChevronRight, FileText, Send, GraduationCap, Award, Menu, X } from "lucide-react";
+import { Code, Globe, Mail, Menu, X, Award } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
-// 3D Tilt Component
-function TiltCard({ children, className, tiltAmount = 15 }) {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
 
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
 
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], [`${tiltAmount}deg`, `-${tiltAmount}deg`]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], [`-${tiltAmount}deg`, `${tiltAmount}deg`]);
+// Ultra-Premium Interactive Aura & Spotlight
+function InteractiveAura() {
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  
+  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
+  const cursorXSpring = useSpring(cursorX, springConfig);
+  const cursorYSpring = useSpring(cursorY, springConfig);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
-  };
+  const [isHovering, setIsHovering] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
+  useEffect(() => {
+    const moveCursor = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
+      if (!isVisible) setIsVisible(true);
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName.toLowerCase() === 'a' ||
+        target.tagName.toLowerCase() === 'button' ||
+        target.closest('a') ||
+        target.closest('button') ||
+        target.closest('.group')
+      ) {
+        setIsHovering(true);
+      } else {
+        setIsHovering(false);
+      }
+    };
+
+    const handleMouseLeave = () => setIsVisible(false);
+    const handleMouseEnter = () => setIsVisible(true);
+
+    window.addEventListener("mousemove", moveCursor);
+    window.addEventListener("mouseover", handleMouseOver);
+    document.addEventListener("mouseleave", handleMouseLeave);
+    document.addEventListener("mouseenter", handleMouseEnter);
+
+    return () => {
+      window.removeEventListener("mousemove", moveCursor);
+      window.removeEventListener("mouseover", handleMouseOver);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+      document.removeEventListener("mouseenter", handleMouseEnter);
+    };
+  }, [cursorX, cursorY, isVisible]);
 
   return (
-    <motion.div
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        rotateY,
-        rotateX,
-        transformStyle: "preserve-3d",
-      }}
-      className={`relative ${className}`}
-    >
-      <div 
-        style={{ transform: "translateZ(50px)", transformStyle: "preserve-3d" }} 
-        className="w-full h-full"
-      >
-        {children}
-      </div>
-      
-      {/* Dynamic 3D Glow on Hover */}
-      <motion.div 
-        className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/0 pointer-events-none rounded-inherit"
+    <>
+      {/* Trailing glowing ring */}
+      <motion.div
+        className={`hidden md:block fixed top-0 left-0 rounded-full pointer-events-none z-[9999] border transition-all duration-300 ${isHovering ? 'w-20 h-20 bg-purple-500/20 border-purple-400/80 blur-[1px] scale-125' : 'w-12 h-12 border-cyan-500/40 bg-transparent scale-100'}`}
         style={{
-          opacity: useTransform(mouseXSpring, [-0.5, 0.5], [0, 1])
+          x: cursorXSpring,
+          y: cursorYSpring,
+          translateX: "-50%",
+          translateY: "-50%",
+          opacity: isVisible ? 1 : 0
         }}
       />
-    </motion.div>
+      {/* Global Spotlight Effect */}
+      <motion.div
+        className="hidden md:block fixed top-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full pointer-events-none z-[1] blur-[120px] transition-opacity duration-500 mix-blend-screen"
+        style={{
+          x: cursorXSpring,
+          y: cursorYSpring,
+          translateX: "-50%",
+          translateY: "-50%",
+          opacity: isVisible ? 1 : 0
+        }}
+      />
+    </>
   );
 }
+
+
 
 export default function Portfolio() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   
   // Scroll Progress
   const { scrollYProgress } = useScroll();
@@ -74,8 +100,9 @@ export default function Portfolio() {
     restDelta: 0.001
   });
 
-  // Handle Navbar Background
+  // Handle Navbar Background and Mount
   useEffect(() => {
+    setIsMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -97,37 +124,54 @@ export default function Portfolio() {
     }
   };
 
-  const navLinks = [
-    { name: 'About', href: '#about' },
-    { name: 'Skills', href: '#skills' },
-    { name: 'Timeline', href: '#timeline' },
-    { name: 'Projects', href: '#projects' },
-    { name: 'Contact', href: '#contact' },
-  ];
-
   return (
-    <main className="min-h-screen pb-20 overflow-hidden relative" style={{ perspective: "1000px" }}>
+    <div className="bg-[#0a0a0a] min-h-screen text-white font-sans selection:bg-purple-500/30 relative overflow-x-hidden">
       
-      {/* Scroll Progress Bar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transform origin-left z-50"
+      <InteractiveAura />
+
+      {/* Progress Bar */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 via-cyan-500 to-purple-500 transform origin-left z-50"
         style={{ scaleX }}
       />
 
+      {/* LEFT SIDEBAR (Socials) */}
+      <div className="fixed left-0 top-0 bottom-0 w-20 hidden md:flex flex-col items-center justify-center gap-10 z-50 border-r border-white/5 bg-black/20 backdrop-blur-sm">
+        <a href="https://github.com/diptikumari12" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-white transition-colors hover:scale-110">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+        </a>
+        <a href="https://linkedin.com/in/dipti-kumari-6032aa39b" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-white transition-colors hover:scale-110">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+        </a>
+        <a href="mailto:diptikumari08932@gmail.com" className="text-muted-foreground hover:text-white transition-colors hover:scale-110">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        </a>
+        <a href="tel:+919110122071" className="text-muted-foreground hover:text-white transition-colors hover:scale-110">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+        </a>
+      </div>
+
       {/* NAVBAR */}
-      <nav className={`fixed top-0 w-full z-40 transition-all duration-300 ${isScrolled ? 'bg-black/50 backdrop-blur-md border-b border-white/10 py-4' : 'bg-transparent py-6'}`}>
-        <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
-          <a href="#" className="text-xl font-bold text-white tracking-tighter">
-            Dipti<span className="text-primary">.dev</span>
+      <nav className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-md border-b border-white/5 py-4' : 'bg-transparent py-6'} md:pl-20`}>
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center w-full">
+          <a href="#" className="text-xl font-bold text-white tracking-widest hidden md:block">
+            DK
           </a>
           
+          {/* Mobile Logo */}
+          <a href="#" className="text-xl font-bold text-white tracking-widest md:hidden">
+            DK
+          </a>
+          
+          <div className="hidden md:block absolute left-1/2 -translate-x-1/2">
+            <span className="text-sm font-medium text-white/80">diptikumari08932@gmail.com</span>
+          </div>
+
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a key={link.name} href={link.href} className="text-sm font-medium text-muted-foreground hover:text-white transition-colors hover:-translate-y-1 transform duration-200">
-                {link.name}
-              </a>
-            ))}
+            <a href="#about" className="text-sm font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-wider">ABOUT</a>
+            <a href="#work" className="text-sm font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-wider">WORK</a>
+            <a href="#contact" className="text-sm font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-wider">CONTACT</a>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -141,41 +185,52 @@ export default function Portfolio() {
           <motion.div 
             initial={{ opacity: 0, y: -20, rotateX: -90 }}
             animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            className="absolute top-full left-0 w-full bg-black/90 backdrop-blur-lg border-b border-white/10 p-6 flex flex-col gap-4 md:hidden origin-top"
+            className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-lg border-b border-white/10 p-6 flex flex-col gap-6 md:hidden origin-top"
           >
-            {navLinks.map((link) => (
-              <a key={link.name} href={link.href} onClick={() => setMobileMenuOpen(false)} className="text-lg font-medium text-white">
-                {link.name}
-              </a>
-            ))}
+            <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white tracking-widest">ABOUT</a>
+            <a href="#work" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white tracking-widest">WORK</a>
+            <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-lg font-bold text-white tracking-widest">CONTACT</a>
+            <div className="flex gap-6 mt-4 pt-4 border-t border-white/10">
+              {/* Mobile Socials */}
+              <a href="https://github.com/diptikumari12" target="_blank" rel="noreferrer" className="text-white"><Code /></a>
+              <a href="https://linkedin.com/in/dipti-kumari-6032aa39b" target="_blank" rel="noreferrer" className="text-white"><Globe /></a>
+              <a href="mailto:diptikumari08932@gmail.com" className="text-white"><Mail /></a>
+            </div>
           </motion.div>
         )}
       </nav>
 
       {/* Dynamic Background Particles (3D space) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ transformStyle: "preserve-3d" }}>
-        {[...Array(30)].map((_, i) => (
+        {isMounted && [...Array(20)].map((_, i) => {
+          // Simple stable pseudo-random based on index to fix hydration issues
+          const rand1 = Math.abs(Math.sin(i * 10)) % 1;
+          const rand2 = Math.abs(Math.cos(i * 20)) % 1;
+          const rand3 = Math.abs(Math.sin(i * 30)) % 1;
+          const rand4 = Math.abs(Math.cos(i * 40)) % 1;
+          const rand5 = Math.abs(Math.sin(i * 50)) % 1;
+          return (
           <motion.div
             key={i}
             className="absolute bg-white rounded-full opacity-20"
             style={{
-              width: Math.random() * 6 + 1 + 'px',
-              height: Math.random() * 6 + 1 + 'px',
-              top: Math.random() * 100 + '%',
-              left: Math.random() * 100 + '%',
-              translateZ: Math.random() * 500 - 250 + 'px',
+              width: rand1 * 6 + 1 + 'px',
+              height: rand1 * 6 + 1 + 'px',
+              top: rand2 * 100 + '%',
+              left: rand3 * 100 + '%',
+              translateZ: rand4 * 500 - 250 + 'px',
             }}
             animate={{
-              y: [0, Math.random() * -200 - 50],
+              y: [0, rand5 * -200 - 50],
               opacity: [0.1, 0.6, 0],
             }}
             transition={{
-              duration: Math.random() * 5 + 5,
+              duration: rand1 * 5 + 5,
               repeat: Infinity,
               ease: "linear",
             }}
           />
-        ))}
+        )})}
       </div>
 
       {/* Background Glowing Orbs */}
@@ -194,349 +249,605 @@ export default function Portfolio() {
         
         {/* HERO SECTION */}
         <motion.section 
-          className="flex flex-col-reverse md:flex-row items-center justify-between gap-12 mb-32 pt-10"
+          className="flex flex-col-reverse md:flex-row items-center justify-between gap-12 mb-40 pt-20"
           initial={{ opacity: 0, z: -100 }}
           animate={{ opacity: 1, z: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           style={{ transformStyle: "preserve-3d" }}
         >
-          <div className="flex-1 space-y-6 text-center md:text-left">
-            <motion.div 
-              className="inline-block px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-sm font-medium mb-2 backdrop-blur-md shadow-[0_0_15px_rgba(255,255,255,0.1)]"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              🚀 Available for New Opportunities
-            </motion.div>
-            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-tight drop-shadow-2xl">
-              Hi, I'm <br/><span className="text-gradient">Dipti Kumari</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl font-light">
-              Full Stack Developer | React.js & Node.js Specialist
-            </p>
+          <div className="flex-1 space-y-2 text-center md:text-left relative z-20">
             
-            <div className="flex flex-wrap justify-center md:justify-start gap-4 pt-6">
-              <TiltCard tiltAmount={10}>
-                <a href="#contact" className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-full font-medium hover:bg-primary/90 transition-all shadow-[0_0_30px_rgba(99,102,241,0.5)]">
-                  <Mail size={18} /> Contact Me
+            <motion.h2 
+              className="text-2xl md:text-3xl text-purple-400 font-light tracking-wide mb-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              Hello! I&apos;m
+            </motion.h2>
+            
+            <motion.h1 
+              className="text-6xl md:text-[5.5rem] font-black tracking-tight leading-[0.9] text-white drop-shadow-lg mb-6"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              DIPTI<br/>KUMARI
+            </motion.h1>
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="space-y-6 max-w-md mx-auto md:mx-0 relative z-20"
+            >
+              <h3 className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-cyan-300 tracking-wide">
+                Full Stack Developer | MERN Stack
+              </h3>
+              
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light">
+                BCA graduate pursuing MCA at Chandigarh University, with hands-on experience in full-stack web development and UI/UX design.
+              </p>
+              
+              {/* Sleek Integrated Action Bar - Fixes wrapping and looks extremely premium */}
+              <div className="inline-flex flex-col sm:flex-row items-center p-1.5 bg-white/5 border border-white/10 rounded-full backdrop-blur-xl shadow-2xl relative z-30 mt-6 w-full sm:w-max">
+                <a href="#work" className="w-full sm:w-auto text-center bg-white text-black font-extrabold tracking-widest text-xs px-8 py-4 rounded-full uppercase transition-all hover:scale-105 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                  View Work
                 </a>
-              </TiltCard>
-              <TiltCard tiltAmount={10}>
-                <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-full font-medium hover:bg-purple-500 transition-all shadow-[0_0_30px_rgba(147,51,234,0.5)]">
-                  <FileText size={18} /> Download Resume
+                <div className="hidden sm:block w-px h-8 bg-white/10 mx-2"></div>
+                <a href="/resume.pdf" download="Dipti_Kumari_Resume.pdf" className="w-full sm:w-auto text-center text-purple-300 hover:text-white font-bold tracking-widest text-xs px-6 py-4 rounded-full uppercase transition-all hover:bg-white/10">
+                  Resume
                 </a>
-              </TiltCard>
-              <TiltCard tiltAmount={15}>
-                <a href="https://linkedin.com/in/dipti-kumari-6032aa39b" target="_blank" rel="noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full glass-panel hover:bg-white/10 transition-all">
-                  <Globe size={18} />
+                <div className="hidden sm:block w-px h-8 bg-white/10 mx-2"></div>
+                <a href="#contact" className="w-full sm:w-auto text-center text-gray-300 hover:text-white font-bold tracking-widest text-xs px-6 py-4 rounded-full uppercase transition-all hover:bg-white/10">
+                  Contact
                 </a>
-              </TiltCard>
-              <TiltCard tiltAmount={15}>
-                <a href="https://github.com/diptikumari12" target="_blank" rel="noreferrer" className="flex items-center justify-center w-12 h-12 rounded-full glass-panel hover:bg-white/10 transition-all">
-                  <Code size={18} />
-                </a>
-              </TiltCard>
-            </div>
+              </div>
+            </motion.div>
           </div>
 
-          <div className="flex-1 flex justify-center md:justify-end relative mt-8 md:mt-0" style={{ perspective: "1000px" }}>
-            <div className="absolute inset-0 bg-primary/20 blur-[100px] rounded-full scale-110" />
+          <div className="flex-1 flex justify-center md:justify-end relative mt-16 md:mt-0">
             
-            {/* 3D Floating Avatar */}
-            <TiltCard tiltAmount={20} className="rounded-full">
-              <motion.div 
-                className="relative w-72 h-72 md:w-[22rem] md:h-[22rem] rounded-full overflow-hidden border-4 border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.8)] ring-2 ring-primary/30"
-                animate={{ y: [0, -20, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-              >
+            {/* Pure Static Raw Cutout (No Effects, No Tilt, No Float) EXACTLY as preferred */}
+            <div className="relative w-[350px] h-[450px] md:w-[500px] md:h-[650px] mx-auto md:mr-0 flex items-end justify-center z-10">
+              
+              <div className="absolute inset-0 w-full h-full">
+                {/* Improved mask and blending for true transparency effect on dark backgrounds */}
                 <Image 
-                  src="/hero.jpg" 
-                  alt="Dipti Kumari Avatar" 
+                  src="/hero2.jpg" 
+                  alt="Dipti Kumari" 
                   fill 
-                  className="object-cover object-top scale-105" 
+                  sizes="(max-width: 768px) 100vw, 500px"
+                  className="object-contain object-bottom mix-blend-screen brightness-110 contrast-125 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_40%,#000_30%,transparent_90%)]" 
                   priority 
                 />
-                <div className="absolute inset-0 rounded-full shadow-[inset_0_0_40px_rgba(0,0,0,0.5)] pointer-events-none" />
-              </motion.div>
-            </TiltCard>
-          </div>
-        </motion.section>
+              </div>
 
-        {/* BENTO GRID (ABOUT & SKILLS) */}
-        <motion.section 
-          id="about"
-          className="mb-32 scroll-mt-24"
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* About Card */}
-            <TiltCard tiltAmount={5} className="md:col-span-2 rounded-[2rem]">
-              <motion.div variants={fadeIn} className="glass-panel p-8 h-full rounded-[2rem] relative overflow-hidden group hover:border-primary/50 transition-colors flex flex-col justify-center shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl -mr-20 -mt-20 transition-all group-hover:bg-primary/30" />
-                <div className="flex items-center gap-4 mb-4 relative" style={{ transform: "translateZ(30px)" }}>
-                  <div className="p-3 bg-primary/20 rounded-xl text-primary shadow-lg"><User size={24} /></div>
-                  <h2 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">About Me</h2>
-                </div>
-                <p className="text-muted-foreground leading-relaxed text-lg relative" style={{ transform: "translateZ(20px)" }}>
-                  BCA graduate and Full Stack Developer with hands-on experience building end-to-end web applications using React.js, Node.js, Express.js, and MongoDB (MERN stack). I specialize in REST API design, JWT authentication, and responsive UI development. Currently working as a UI/UX Design Intern, adding a strong design perspective to my development work.
+              {/* Dynamic floating text overlay */}
+              <motion.div 
+                className="absolute bottom-12 left-1/2 -translate-x-1/2 w-[120%] text-center pointer-events-none"
+                animate={{ y: [-8, 8, -8] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <p className="text-white font-black text-[14px] md:text-[16px] tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">
+                  OPEN TO OPPORTUNITIES
+                </p>
+                <p className="text-purple-300 font-bold text-xs md:text-sm mt-2 drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">
+                  Available for Full-Time & Internship Roles
                 </p>
               </motion.div>
-            </TiltCard>
-
-            {/* Frameworks Card */}
-            <TiltCard tiltAmount={10} className="rounded-[2rem]">
-              <motion.div id="skills" variants={fadeIn} className="glass-panel p-8 h-full rounded-[2rem] relative overflow-hidden group hover:border-purple-500/50 transition-colors scroll-mt-24 shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-                <div className="absolute bottom-0 right-0 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl transition-all group-hover:bg-purple-500/30" />
-                <h3 className="text-2xl font-bold text-purple-400 mb-6 relative" style={{ transform: "translateZ(30px)" }}>Frameworks</h3>
-                <ul className="space-y-4 text-lg font-medium relative" style={{ transform: "translateZ(20px)" }}>
-                  <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]" /> React.js & Next.js</li>
-                  <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]" /> Node.js & Express</li>
-                  <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]" /> Spring Boot</li>
-                  <li className="flex items-center gap-3"><span className="w-2 h-2 rounded-full bg-purple-400 shadow-[0_0_10px_#c084fc]" /> Tailwind CSS</li>
-                </ul>
-              </motion.div>
-            </TiltCard>
-
-            {/* Languages Card */}
-            <TiltCard tiltAmount={10} className="rounded-[2rem]">
-              <motion.div variants={fadeIn} className="glass-panel p-8 h-full rounded-[2rem] relative overflow-hidden group hover:border-emerald-500/50 transition-colors shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-                <div className="absolute top-0 left-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl transition-all group-hover:bg-emerald-500/20" />
-                <h3 className="text-2xl font-bold text-emerald-400 mb-6 relative" style={{ transform: "translateZ(30px)" }}>Languages</h3>
-                <div className="flex flex-wrap gap-3 relative" style={{ transform: "translateZ(20px)" }}>
-                  {['JavaScript (ES6+)', 'HTML5', 'CSS3', 'Python', 'Java'].map((lang) => (
-                    <span key={lang} className="px-4 py-2 bg-emerald-500/10 rounded-xl text-sm border border-emerald-500/20 hover:bg-emerald-500/30 text-emerald-100 transition-colors cursor-default shadow-lg backdrop-blur-md">{lang}</span>
-                  ))}
-                </div>
-              </motion.div>
-            </TiltCard>
-
-            {/* Tools Card */}
-            <TiltCard tiltAmount={5} className="md:col-span-2 rounded-[2rem]">
-              <motion.div variants={fadeIn} className="glass-panel p-8 h-full rounded-[2rem] md:col-span-2 relative overflow-hidden group hover:border-blue-500/50 transition-colors shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl transition-all group-hover:bg-blue-500/20" />
-                <h3 className="text-2xl font-bold text-blue-400 mb-6 relative" style={{ transform: "translateZ(30px)" }}>Databases & Tools</h3>
-                <div className="flex flex-wrap gap-3 relative" style={{ transform: "translateZ(20px)" }}>
-                  {['MongoDB', 'MySQL', 'PostgreSQL', 'Git & GitHub', 'Docker', 'Figma', 'Postman', 'SEO', 'Google Ads'].map((tool) => (
-                    <span key={tool} className="px-5 py-2.5 bg-blue-500/10 text-blue-200 rounded-xl text-sm font-medium border border-blue-500/20 hover:bg-blue-500/30 transition-colors shadow-lg backdrop-blur-md cursor-default">{tool}</span>
-                  ))}
-                </div>
-              </motion.div>
-            </TiltCard>
-
+            </div>
           </div>
         </motion.section>
 
-        {/* TIMELINE (EDUCATION & CERTS) */}
+        {/* EDUCATION SECTION */}
         <motion.section 
-          id="timeline"
-          className="mb-32 scroll-mt-24"
+          id="education"
+          className="mb-40 scroll-mt-32 pt-10"
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerContainer}
         >
-          <div className="flex items-center gap-4 mb-12 justify-center">
-            <TiltCard tiltAmount={20} className="rounded-xl">
-              <div className="p-4 bg-amber-500/20 rounded-xl text-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.3)]"><GraduationCap size={32} /></div>
-            </TiltCard>
-            <h2 className="text-4xl font-extrabold drop-shadow-lg">Journey & Growth</h2>
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide">
+              Education &<br/>
+              <span className="text-purple-400 font-light italic">Journey</span>
+            </h2>
+            <p className="text-gray-400 mt-4 text-sm md:text-base tracking-wide">
+              Building my foundation, one milestone at a time.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 relative" style={{ transformStyle: "preserve-3d" }}>
-            <TiltCard tiltAmount={5} className="rounded-2xl">
-              <div className="glass-panel p-8 rounded-2xl h-full shadow-[0_15px_50px_rgba(0,0,0,0.5)]">
-                <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3 relative" style={{ transform: "translateZ(20px)" }}>
-                  <Award className="text-primary"/> Education
-                </h3>
-                <div className="space-y-8 border-l-2 border-primary/40 pl-6 ml-3 relative" style={{ transform: "translateZ(10px)" }}>
-                  <motion.div variants={fadeIn} className="relative group">
-                    <div className="absolute -left-[35px] top-1 w-4 h-4 bg-primary rounded-full shadow-[0_0_15px_rgba(99,102,241,1)] group-hover:scale-150 transition-transform" />
-                    <h4 className="text-xl font-bold text-white group-hover:text-primary transition-colors">Bachelor of Computer Applications (BCA)</h4>
-                    <p className="text-primary font-mono text-sm mb-2 mt-1 bg-primary/10 inline-block px-2 py-0.5 rounded">2023 - 2026</p>
-                    <p className="text-muted-foreground mt-2">CIMAGE Professional College, Patna, Bihar</p>
-                  </motion.div>
-                  <motion.div variants={fadeIn} className="relative group">
-                    <div className="absolute -left-[35px] top-1 w-4 h-4 bg-primary/50 rounded-full group-hover:scale-150 transition-transform group-hover:bg-primary shadow-[0_0_15px_rgba(99,102,241,0)] group-hover:shadow-[0_0_15px_rgba(99,102,241,1)]" />
-                    <h4 className="text-xl font-bold text-white group-hover:text-primary transition-colors">Intermediate (XII) - BSEB</h4>
-                    <p className="text-primary font-mono text-sm mb-2 mt-1 bg-primary/10 inline-block px-2 py-0.5 rounded">2022 - 2023</p>
-                    <p className="text-muted-foreground mt-2">S.B College, Arrah, Bihar</p>
-                  </motion.div>
-                </div>
-              </div>
-            </TiltCard>
-
-            <TiltCard tiltAmount={5} className="rounded-2xl">
-              <div className="glass-panel p-8 rounded-2xl h-full shadow-[0_15px_50px_rgba(0,0,0,0.5)]">
-                <h3 className="text-2xl font-bold text-white mb-8 flex items-center gap-3 relative" style={{ transform: "translateZ(20px)" }}>
-                  <Award className="text-purple-400"/> Certifications
-                </h3>
-                <div className="space-y-4 relative" style={{ transform: "translateZ(10px)" }}>
-                  {[
-                    { title: "TCS iON Career Edge - Generative AI", date: "June 2026" },
-                    { title: "AWS Educate - Intro to Generative AI", date: "2026" },
-                    { title: "Deloitte - Data Analytics Job Simulation", date: "July 2026" },
-                    { title: "IBM Cognitive Class - Data Analysis", date: "May 2026" },
-                    { title: "Coursera - Build a Free WordPress Site", date: "May 2026" }
-                  ].map((cert, i) => (
-                    <motion.div variants={fadeIn} key={i} className="bg-white/5 border border-white/10 p-4 rounded-xl flex justify-between items-center hover:scale-[1.03] hover:bg-white/10 hover:border-purple-500/50 transition-all group shadow-md hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]">
-                      <span className="text-white font-medium group-hover:text-purple-300 transition-colors">{cert.title}</span>
-                      <span className="text-xs text-purple-400 font-mono bg-purple-500/20 px-3 py-1.5 rounded-full whitespace-nowrap ml-4 border border-purple-500/30">{cert.date}</span>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </TiltCard>
-          </div>
-        </motion.section>
-
-        {/* IMAGE-RICH PROJECTS SECTION */}
-        <motion.section 
-          id="projects"
-          className="mb-32 scroll-mt-24"
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-        >
-          <div className="flex items-center gap-4 mb-12 justify-center">
-            <TiltCard tiltAmount={20} className="rounded-xl">
-              <div className="p-4 bg-emerald-500/20 rounded-xl text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]"><Terminal size={32} /></div>
-            </TiltCard>
-            <h2 className="text-4xl font-extrabold drop-shadow-lg">Featured Projects</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="relative max-w-5xl mx-auto px-4">
+            {/* Center glowing line container with moving laser effect */}
+            <div className="hidden md:block absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-[2px] bg-white/5 overflow-hidden">
+              {/* Moving glowing laser dot */}
+              <motion.div 
+                className="w-full h-32 bg-gradient-to-b from-transparent via-purple-500 to-transparent shadow-[0_0_10px_rgba(168,85,247,1)]"
+                animate={{ y: [-150, 800] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              />
+            </div>
             
-            {/* Project 1 */}
-            <TiltCard tiltAmount={10} className="rounded-3xl">
-              <motion.div variants={fadeIn} className="glass-panel overflow-hidden rounded-3xl h-full flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 group">
-                <div className="relative h-72 w-full overflow-hidden">
-                  <Image src="/food.jpg" alt="Food Restro" fill className="object-cover group-hover:scale-125 transition-transform duration-1000 ease-out" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-colors duration-500" />
-                  <div className="absolute top-4 right-4 px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/20 shadow-lg">In Development</div>
-                  
-                  <div className="absolute bottom-6 left-8 right-8" style={{ transform: "translateZ(40px)" }}>
-                    <h3 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">Food Restro</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {['Next.js', 'Spring Boot', 'PostgreSQL', 'Docker'].map(t => (
-                        <span key={t} className="px-2.5 py-1 text-xs font-mono text-emerald-300 bg-emerald-500/20 border border-emerald-500/30 rounded-md backdrop-blur-md">{t}</span>
-                      ))}
-                    </div>
-                  </div>
+            {/* MCA */}
+            <div className="relative flex flex-col md:flex-row items-center justify-between w-full mb-24 group">
+              <div className="w-full md:w-[40%] text-center md:text-right pr-0 md:pr-12 mb-6 md:mb-0">
+                <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-wide leading-tight">Master of<br className="hidden md:block"/>Computer<br className="hidden md:block"/>Applications</h3>
+                <p className="text-purple-400 font-bold text-sm md:text-base tracking-wider">Chandigarh University</p>
+              </div>
+              
+              <div className="relative flex justify-center w-full md:w-[20%] z-10 mb-6 md:mb-0">
+                {/* Glowing Dot Top */}
+                <div className="hidden md:block absolute -top-12 left-1/2 -translate-x-1/2 w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_10px_#c084fc]" />
+                
+                {/* Center Box */}
+                <div className="bg-[#050505] px-6 py-4 rounded-2xl border border-white/5 shadow-2xl relative z-10 group-hover:border-purple-500/30 transition-colors duration-500 min-w-[200px]">
+                  <div className="text-purple-400 font-bold text-[10px] tracking-widest uppercase mb-1 whitespace-nowrap text-center">Currently Pursuing</div>
+                  <div className="text-xl md:text-2xl font-black text-white/90 tracking-widest whitespace-nowrap text-center">2026 - Present</div>
                 </div>
-                <div className="p-8 flex-1 flex flex-col justify-between relative" style={{ transform: "translateZ(20px)" }}>
-                  <p className="text-muted-foreground text-base leading-relaxed mb-6">
-                    Full Stack Food Ordering & Restaurant Application. Collaborated with a team to build the Next.js frontend and coordinated with backend developers on a secure, scalable Spring Boot service. Contributed to relational data models and REST APIs.
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-emerald-400 font-bold uppercase tracking-wider group-hover:text-emerald-300 cursor-pointer w-fit">
-                    View Project <ChevronRight size={18} className="group-hover:translate-x-2 transition-transform" />
-                  </div>
-                </div>
-              </motion.div>
-            </TiltCard>
+              </div>
+              
+              <div className="w-full md:w-[40%] pl-0 md:pl-12 text-center md:text-left">
+                <p className="text-gray-400 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
+                  Focusing on advanced software architecture, scalable web technologies, and modern development practices.
+                </p>
+              </div>
+            </div>
 
-            {/* Project 2 */}
-            <TiltCard tiltAmount={10} className="rounded-3xl">
-              <motion.div variants={fadeIn} className="glass-panel overflow-hidden rounded-3xl h-full flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 group">
-                <div className="relative h-72 w-full overflow-hidden">
-                  <Image src="/ecommerce.jpg" alt="Goverdhan Food Product" fill className="object-cover group-hover:scale-125 transition-transform duration-1000 ease-out" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent transition-colors duration-500" />
-                  
-                  <div className="absolute bottom-6 left-8 right-8" style={{ transform: "translateZ(40px)" }}>
-                    <h3 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">Goverdhan Food Product</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {['React.js', 'Node.js', 'MongoDB', 'Razorpay'].map(t => (
-                        <span key={t} className="px-2.5 py-1 text-xs font-mono text-blue-300 bg-blue-500/20 border border-blue-500/30 rounded-md backdrop-blur-md">{t}</span>
-                      ))}
-                    </div>
+            {/* BCA */}
+            <div className="relative flex flex-col md:flex-row items-center justify-between w-full group">
+              <div className="w-full md:w-[40%] text-center md:text-right pr-0 md:pr-12 mb-6 md:mb-0">
+                <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-wide leading-tight">Bachelor of<br className="hidden md:block"/>Computer<br className="hidden md:block"/>Applications</h3>
+                <p className="text-purple-400 font-bold text-sm md:text-base tracking-wider">CIMAGE Professional College</p>
+              </div>
+              
+              <div className="relative flex justify-center w-full md:w-[20%] z-10 mb-6 md:mb-0">
+                {/* Glowing Dot Top */}
+                <div className="hidden md:block absolute -top-12 left-1/2 -translate-x-1/2 w-2 h-2 bg-purple-400 rounded-full shadow-[0_0_10px_#c084fc]" />
+                
+                {/* Center Box */}
+                <div className="bg-[#050505] px-6 py-4 rounded-2xl border border-white/5 shadow-2xl relative z-10 group-hover:border-purple-500/30 transition-colors duration-500 min-w-[200px]">
+                  <div className="text-emerald-400 font-bold text-[10px] tracking-widest uppercase mb-1 text-center">Completed</div>
+                  <div className="text-xl md:text-2xl font-black text-white/90 tracking-widest whitespace-nowrap text-center">2023 - 2026</div>
+                </div>
+              </div>
+              
+              <div className="w-full md:w-[40%] pl-0 md:pl-12 text-center md:text-left">
+                <p className="text-gray-400 text-sm leading-relaxed max-w-sm mx-auto md:mx-0">
+                  Built a strong foundation in computer science and developed robust MERN stack projects.
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* ULTRA-PREMIUM INTERACTIVE EXPANDING TECH STACK */}
+        <motion.section 
+          id="techstack"
+          className="mb-40 scroll-mt-32 pt-20 relative max-w-6xl mx-auto px-6"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeIn}
+        >
+          <div className="mb-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+              Interactive <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">Tech Stack</span>
+            </h2>
+            <p className="text-gray-400 mt-4 max-w-xl mx-auto text-sm md:text-base">
+              Hover (or tap on mobile) over the panels below to explore my technical expertise.
+            </p>
+          </div>
+
+          <div className="flex flex-col md:flex-row h-auto md:h-[500px] gap-4 w-full">
+            
+            {/* Frontend Panel */}
+            <div tabIndex={0} className="flex-1 md:hover:flex-[2.5] focus:flex-[2.5] md:focus:flex-[2.5] transition-all duration-700 ease-in-out bg-[#0a0a0a] border border-white/10 rounded-3xl relative overflow-hidden group cursor-pointer outline-none min-h-[100px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-transparent opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700" />
+              
+              <div className="absolute top-8 left-0 w-full flex justify-center md:-rotate-90 md:origin-center md:absolute md:top-1/2 md:-translate-y-1/2 md:group-hover:opacity-0 group-focus:opacity-0 transition-opacity duration-300 pointer-events-none">
+                <h3 className="text-xl font-bold text-gray-500 tracking-widest uppercase">Frontend</h3>
+              </div>
+
+              <div className="p-8 h-full w-full opacity-100 md:opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 delay-100 flex flex-col justify-end">
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-6 hidden md:block">Frontend</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <h4 className="text-cyan-400 font-bold text-sm">HTML/CSS/JS</h4>
+                    <p className="text-gray-500 text-xs">Core Web</p>
+                  </div>
+                  <div className="flex flex-col bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <h4 className="text-cyan-400 font-bold text-sm">React.js</h4>
+                    <p className="text-gray-500 text-xs">UI Library</p>
+                  </div>
+                  <div className="flex flex-col bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <h4 className="text-white font-bold text-sm">Next.js</h4>
+                    <p className="text-gray-500 text-xs">Framework</p>
                   </div>
                 </div>
-                <div className="p-8 flex-1 flex flex-col justify-between relative" style={{ transform: "translateZ(20px)" }}>
-                  <p className="text-muted-foreground text-base leading-relaxed mb-6">
-                    Full-stack grocery e-commerce platform with product, cart, and order management. Designed REST APIs for authentication, products, and integrated Razorpay payment gateway. Implemented JWT-based authentication for secure login.
-                  </p>
-                  <a href="https://github.com/diptikumari12/goverdhan-food-product" target="_blank" rel="noreferrer" className="flex w-fit items-center gap-2 text-sm text-white font-bold bg-blue-600/30 px-6 py-3 rounded-xl hover:bg-blue-600/50 border border-blue-500/50 transition-all shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.6)]">
-                    <Code size={18} /> View Code
-                  </a>
-                </div>
-              </motion.div>
-            </TiltCard>
+              </div>
+            </div>
 
-            {/* Project 3 */}
-            <TiltCard tiltAmount={8} className="md:col-span-2 rounded-3xl">
-              <motion.div variants={fadeIn} className="glass-panel overflow-hidden rounded-3xl md:col-span-2 flex flex-col md:flex-row shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 group">
-                <div className="relative h-72 md:h-auto md:w-1/2 overflow-hidden">
-                  <Image src="/agency.jpg" alt="Slang Era Marketing" fill className="object-cover group-hover:scale-125 transition-transform duration-1000 ease-out" />
-                  <div className="absolute inset-0 bg-black/30 transition-colors duration-500" />
-                </div>
-                <div className="p-10 md:w-1/2 flex flex-col justify-center relative bg-gradient-to-l from-black/80 to-black/90">
-                  <h3 className="text-3xl font-bold text-white mb-4 drop-shadow-lg" style={{ transform: "translateZ(30px)" }}>Slang Era Marketing</h3>
-                  <div className="flex flex-wrap gap-2 mb-6" style={{ transform: "translateZ(25px)" }}>
-                    {['React.js', 'Responsive Design', 'SEO'].map(t => (
-                      <span key={t} className="px-3 py-1.5 text-xs font-mono text-purple-300 bg-purple-500/20 border border-purple-500/30 rounded-lg backdrop-blur-md">{t}</span>
-                    ))}
+            {/* Backend Panel */}
+            <div tabIndex={0} className="flex-1 md:hover:flex-[2.5] focus:flex-[2.5] transition-all duration-700 ease-in-out bg-[#0a0a0a] border border-white/10 rounded-3xl relative overflow-hidden group cursor-pointer outline-none min-h-[100px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700" />
+              
+              <div className="absolute top-8 left-0 w-full flex justify-center md:-rotate-90 md:origin-center md:absolute md:top-1/2 md:-translate-y-1/2 md:group-hover:opacity-0 group-focus:opacity-0 transition-opacity duration-300 pointer-events-none">
+                <h3 className="text-xl font-bold text-gray-500 tracking-widest uppercase">Backend</h3>
+              </div>
+
+              <div className="p-8 h-full w-full opacity-100 md:opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 delay-100 flex flex-col justify-end">
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-6 hidden md:block">Backend</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <div><h4 className="text-green-400 font-bold text-sm">Node.js</h4><p className="text-gray-500 text-xs">Runtime</p></div>
                   </div>
-                  <p className="text-muted-foreground text-lg leading-relaxed mb-10" style={{ transform: "translateZ(20px)" }}>
-                    Collaborated with a team to design and build a live business website for a digital marketing agency. Contributed to the client portal login, booking flow, and helped build a responsive, SEO-optimized layout for client conversion.
-                  </p>
-                  <a href="https://slangeramarketing.com" target="_blank" rel="noreferrer" className="flex w-fit items-center gap-3 text-base text-white font-bold bg-purple-600/40 px-8 py-4 rounded-xl hover:bg-purple-600/60 border border-purple-500/50 transition-all shadow-[0_0_20px_rgba(147,51,234,0.3)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)]" style={{ transform: "translateZ(40px)" }}>
-                    <ExternalLink size={20} /> Visit Live Demo
-                  </a>
+                  <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <div><h4 className="text-white font-bold text-sm">Express.js</h4><p className="text-gray-500 text-xs">Framework</p></div>
+                  </div>
+                  <div className="flex items-center gap-4 bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <div><h4 className="text-gray-300 font-bold text-sm">REST APIs</h4><p className="text-gray-500 text-xs">Architecture</p></div>
+                  </div>
                 </div>
-              </motion.div>
-            </TiltCard>
+              </div>
+            </div>
 
+            {/* Database Panel */}
+            <div tabIndex={0} className="flex-1 md:hover:flex-[2.5] focus:flex-[2.5] transition-all duration-700 ease-in-out bg-[#0a0a0a] border border-white/10 rounded-3xl relative overflow-hidden group cursor-pointer outline-none min-h-[100px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700" />
+              
+              <div className="absolute top-8 left-0 w-full flex justify-center md:-rotate-90 md:origin-center md:absolute md:top-1/2 md:-translate-y-1/2 md:group-hover:opacity-0 group-focus:opacity-0 transition-opacity duration-300 pointer-events-none">
+                <h3 className="text-xl font-bold text-gray-500 tracking-widest uppercase">Database</h3>
+              </div>
+
+              <div className="p-8 h-full w-full opacity-100 md:opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 delay-100 flex flex-col justify-end">
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-6 hidden md:block">Database</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <div><h4 className="text-emerald-400 font-bold text-sm">MongoDB</h4><p className="text-gray-500 text-xs">NoSQL Document DB</p></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Tools Panel */}
+            <div tabIndex={0} className="flex-1 md:hover:flex-[2.5] focus:flex-[2.5] transition-all duration-700 ease-in-out bg-[#0a0a0a] border border-white/10 rounded-3xl relative overflow-hidden group cursor-pointer outline-none min-h-[100px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 to-transparent opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700" />
+              
+              <div className="absolute top-8 left-0 w-full flex justify-center md:-rotate-90 md:origin-center md:absolute md:top-1/2 md:-translate-y-1/2 md:group-hover:opacity-0 group-focus:opacity-0 transition-opacity duration-300 pointer-events-none">
+                <h3 className="text-xl font-bold text-gray-500 tracking-widest uppercase">Tools</h3>
+              </div>
+
+              <div className="p-8 h-full w-full opacity-100 md:opacity-0 md:group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 delay-100 flex flex-col justify-end">
+                <h3 className="text-2xl md:text-3xl font-black text-white mb-6 hidden md:block">Tools & Design</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <h4 className="text-orange-400 font-bold text-sm">Git & GitHub</h4>
+                    <p className="text-gray-500 text-xs">Version Control</p>
+                  </div>
+                  <div className="bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm">
+                    <h4 className="text-blue-400 font-bold text-sm">Docker</h4>
+                    <p className="text-gray-500 text-xs">Containerization</p>
+                  </div>
+                  <div className="bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm col-span-2">
+                    <h4 className="text-pink-400 font-bold text-sm">Figma</h4>
+                    <p className="text-gray-500 text-xs">UI/UX Design & Prototyping</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </motion.section>
+
+        {/* ABOUT SECTION */}
+        <motion.section 
+          id="about"
+          className="mb-40 scroll-mt-32 pt-10"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <div className="flex flex-col md:flex-row items-center gap-16">
+            <div className="w-full md:w-1/2">
+              <h2 className="text-6xl md:text-[6rem] font-black leading-[0.8] text-white tracking-tighter">ABOUT<br/><span className="text-purple-400">ME</span></h2>
+            </div>
+            
+            <div className="w-full md:w-1/2 space-y-8 relative">
+              <div className="border border-white/10 border-dashed p-8 relative bg-white/5 backdrop-blur-sm">
+                <p className="text-gray-300 text-base md:text-lg leading-relaxed">
+                  I am a BCA graduate currently pursuing an MCA at Chandigarh University. With a strong interest in full-stack development, modern web technologies, and UI/UX design, I am passionate about building responsive, user-friendly, and scalable applications. I enjoy tackling complex problems and continually learning new skills to stay at the forefront of web development.
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* EXPERIENCE SECTION */}
+        <motion.section 
+          id="experience"
+          className="mb-40 scroll-mt-32 pt-10"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <div className="mb-20 text-center">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide">
+              Work <span className="text-purple-400 font-light italic">Experience</span>
+            </h2>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-8">
+            {/* Exp 1 */}
+            <motion.div 
+              animate={{ y: [-5, 5, -5] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-purple-500/50 transition-colors"
+            >
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">UI/UX Design Intern</h3>
+                  <p className="text-purple-400 font-medium tracking-wide">Casa Chic Interiors</p>
+                </div>
+                <div className="mt-2 md:mt-0 px-4 py-1 bg-white/10 text-white text-sm rounded-full w-max">
+                  2026 - Present
+                </div>
+              </div>
+              <ul className="list-disc list-inside text-gray-400 space-y-2 mt-4 text-sm md:text-base leading-relaxed">
+                <li>Designed intuitive and engaging user interfaces for client websites using Figma.</li>
+                <li>Created high-fidelity wireframes and interactive prototypes for cross-functional teams.</li>
+                <li>Collaborated with developers to ensure seamless translation of designs into functional frontend components.</li>
+              </ul>
+            </motion.div>
+
+            {/* Exp 2 */}
+            <motion.div 
+              animate={{ y: [5, -5, 5] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+              className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-cyan-500/50 transition-colors"
+            >
+              <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Freelance Web Developer</h3>
+                  <p className="text-cyan-400 font-medium tracking-wide">Self-Employed</p>
+                </div>
+                <div className="mt-2 md:mt-0 px-4 py-1 bg-white/10 text-white text-sm rounded-full w-max">
+                  July 2026 - Present
+                </div>
+              </div>
+              <ul className="list-disc list-inside text-gray-400 space-y-2 mt-4 text-sm md:text-base leading-relaxed">
+                <li>Developed full-stack web applications for various clients using the MERN stack and Next.js.</li>
+                <li>Implemented responsive designs, ensuring cross-browser and cross-device compatibility.</li>
+                <li>Integrated third-party APIs and managed database schemas for efficient data retrieval.</li>
+              </ul>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* FEATURED PROJECTS SECTION */}
+        <motion.section 
+          id="work"
+          className="mb-40 scroll-mt-32 pt-10"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <div className="mb-20">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-500">
+              Featured <span className="text-purple-400">Projects</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-white/10 border-t border-b border-white/10 py-12">
+            
+            {/* Column 1: Goverdhan */}
+            <div className="px-6 flex flex-col h-full group" style={{ perspective: "1000px" }}>
+              <div className="flex justify-between items-end mb-10">
+                <h3 className="text-5xl font-light text-white">01</h3>
+                <div className="text-right">
+                  <h4 className="text-white font-bold tracking-widest">GOVERDHAN</h4>
+                  <p className="text-gray-500 text-sm">E-Commerce</p>
+                </div>
+              </div>
+              <div className="mb-8">
+                <h5 className="text-white font-bold mb-2">Tech Stack & Features</h5>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                  React.js, Node.js, Express.js, MongoDB<br/><br/>
+                  Full-stack MERN grocery platform featuring a product catalog, category filtering, cart management, and user authentication.
+                </p>
+
+              </div>
+              <motion.div 
+                className="mt-auto relative h-48 w-full rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors"
+                style={{ transformStyle: "preserve-3d" }}
+                animate={{ y: [-8, 8, -8] }}
+                whileHover={{ rotateX: 10, rotateY: -10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
+                transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
+              >
+                <Image src="/api/image?name=goverdhan" unoptimized={true} alt="Goverdhan Food Product" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+              </motion.div>
+            </div>
+
+            {/* Column 2: Food Restro */}
+            <div className="px-6 flex flex-col h-full group pt-10 md:pt-0" style={{ perspective: "1000px" }}>
+              <motion.div 
+                className="mb-10 w-full relative h-64 rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors"
+                style={{ transformStyle: "preserve-3d" }}
+                animate={{ y: [8, -8, 8] }}
+                whileHover={{ rotateX: -10, rotateY: 10, z: 50, scale: 1.05, boxShadow: "-20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
+                transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
+              >
+                <Image src="/food.jpg" alt="Food Restro" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+              </motion.div>
+              <div className="flex justify-between items-end mb-10">
+                <h3 className="text-5xl font-light text-white">02</h3>
+                <div className="text-right">
+                  <h4 className="text-white font-bold tracking-widest">FOOD RESTRO</h4>
+                  <p className="text-gray-500 text-sm">Restaurant Web App</p>
+                </div>
+              </div>
+              <div className="mb-8 mt-auto">
+                <h5 className="text-white font-bold mb-2">Tech Stack & Features</h5>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                  Next.js, Node.js, Express.js<br/><br/>
+                  Web development project for restaurant management. Implemented features for browsing menus, handling orders, and responsive layout.
+                </p>
+
+              </div>
+            </div>
+
+            {/* Column 3: Slang Era */}
+            <div className="px-6 flex flex-col h-full group pt-10 md:pt-0" style={{ perspective: "1000px" }}>
+              <div className="flex justify-between items-end mb-10">
+                <h3 className="text-5xl font-light text-white">03</h3>
+                <div className="text-right">
+                  <h4 className="text-white font-bold tracking-widest uppercase">SLANG ERA</h4>
+                  <p className="text-gray-500 text-sm">Marketing Agency</p>
+                </div>
+              </div>
+              <div className="mb-8">
+                <h5 className="text-white font-bold mb-2">Tech Stack & Features</h5>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">
+                  React.js, Responsive Design, SEO<br/><br/>
+                  Client agency website for a digital marketing firm, featuring service portals, pricing sections, and high-conversion landing pages.
+                </p>
+
+              </div>
+              <motion.div 
+                className="mt-auto relative h-64 w-full rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors"
+                style={{ transformStyle: "preserve-3d" }}
+                animate={{ y: [-8, 8, -8] }}
+                whileHover={{ rotateX: 10, rotateY: 10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
+                transition={{ y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
+              >
+                <Image src="/api/image?name=slangera" unoptimized={true} alt="Slang Era Marketing" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+              </motion.div>
+            </div>
+
+          </div>
+        </motion.section>
+
+        {/* CERTIFICATIONS SECTION */}
+        <motion.section 
+          id="certifications"
+          className="mb-40 scroll-mt-32 pt-10"
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={fadeIn}
+        >
+          <div className="mb-16 text-center">
+            <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide mb-4">
+              Certifications & <span className="text-purple-400 font-light italic">Achievements</span>
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-colors">
+              <Award className="text-purple-400 mb-4" size={32} />
+              <h3 className="text-white font-bold text-lg mb-1">Generative AI</h3>
+              <p className="text-gray-400 text-sm">TCS iON</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-colors">
+              <Award className="text-purple-400 mb-4" size={32} />
+              <h3 className="text-white font-bold text-lg mb-1">AWS Educate</h3>
+              <p className="text-gray-400 text-sm">Amazon Web Services</p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 transition-colors">
+              <Award className="text-purple-400 mb-4" size={32} />
+              <h3 className="text-white font-bold text-lg mb-1">Job Simulation</h3>
+              <p className="text-gray-400 text-sm">Deloitte</p>
+            </div>
           </div>
         </motion.section>
 
         {/* CONTACT SECTION */}
         <motion.section 
           id="contact"
-          className="mb-20 scroll-mt-24"
+          className="mb-32 scroll-mt-32 pt-10"
           initial="initial"
           whileInView="animate"
           viewport={{ once: true, margin: "-100px" }}
           variants={fadeIn}
         >
-          <TiltCard tiltAmount={5} className="rounded-3xl max-w-3xl mx-auto">
-            <div className="glass-panel p-10 md:p-16 text-center rounded-3xl relative overflow-hidden group shadow-[0_20px_60px_rgba(0,0,0,0.6)] border-2 border-white/10">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/20 via-transparent to-transparent opacity-50 pointer-events-none" />
-              
-              <div className="inline-block p-5 bg-primary/20 rounded-full text-primary mb-8 shadow-[0_0_30px_rgba(99,102,241,0.5)] relative" style={{ transform: "translateZ(40px)" }}>
-                <Send size={40} />
-              </div>
-              <h2 className="text-5xl font-extrabold mb-6 drop-shadow-xl relative" style={{ transform: "translateZ(30px)" }}>Let's Work Together</h2>
-              <p className="text-muted-foreground mb-10 text-xl font-light relative" style={{ transform: "translateZ(20px)" }}>
-                I'm currently looking for new opportunities as a Full Stack Developer. Whether you have a question or just want to say hi, I'll try my best to get back to you!
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-wide mb-4">
+                Let&apos;s Work <span className="text-purple-400 font-light italic">Together</span>
+              </h2>
+              <p className="text-gray-400 text-lg">
+                Feel free to reach out for collaborations or just a friendly hello.
               </p>
-              
-              <form className="space-y-6 text-left relative" style={{ transform: "translateZ(30px)" }} onSubmit={(e) => { e.preventDefault(); alert('Form submitted! This is a UI mockup.'); }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-white uppercase tracking-wider">Name</label>
-                    <input type="text" required className="w-full bg-black/40 border-2 border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-primary/80 transition-all hover:bg-black/60 shadow-inner" placeholder="John Doe" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-white uppercase tracking-wider">Email</label>
-                    <input type="email" required className="w-full bg-black/40 border-2 border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-primary/80 transition-all hover:bg-black/60 shadow-inner" placeholder="john@example.com" />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-white uppercase tracking-wider">Message</label>
-                  <textarea required rows={5} className="w-full bg-black/40 border-2 border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-primary/80 transition-all resize-none hover:bg-black/60 shadow-inner" placeholder="Hello Dipti, I'd like to discuss a project..." />
-                </div>
-                <button type="submit" className="w-full bg-gradient-to-r from-primary to-purple-600 text-white font-extrabold text-xl py-5 rounded-xl flex items-center justify-center gap-3 hover:from-primary/80 hover:to-purple-600/80 transition-all hover:scale-[1.02] shadow-[0_10px_40px_rgba(99,102,241,0.6)] mt-6">
-                  Send Message <Send size={24} />
-                </button>
-              </form>
             </div>
-          </TiltCard>
+
+            <div className="flex flex-col lg:flex-row gap-12">
+              <div className="w-full lg:w-1/3 space-y-6">
+                <a href="mailto:diptikumari08932@gmail.com" className="flex items-center gap-4 p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-purple-500/50 transition-colors group">
+                  <div className="bg-purple-500/20 p-4 rounded-full text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                    <Mail size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm">Email</h4>
+                    <p className="text-gray-400 text-xs">diptikumari08932@gmail.com</p>
+                  </div>
+                </a>
+                <a href="https://linkedin.com/in/dipti-kumari-6032aa39b" target="_blank" rel="noreferrer" className="flex items-center gap-4 p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-blue-500/50 transition-colors group">
+                  <div className="bg-blue-500/20 p-4 rounded-full text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                    <Globe size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm">LinkedIn</h4>
+                    <p className="text-gray-400 text-xs">Dipti Kumari</p>
+                  </div>
+                </a>
+                <a href="https://github.com/diptikumari12" target="_blank" rel="noreferrer" className="flex items-center gap-4 p-6 bg-white/5 border border-white/10 rounded-2xl hover:border-gray-500/50 transition-colors group">
+                  <div className="bg-gray-500/20 p-4 rounded-full text-gray-400 group-hover:bg-gray-500 group-hover:text-white transition-colors">
+                    <Code size={24} />
+                  </div>
+                  <div>
+                    <h4 className="text-white font-bold text-sm">GitHub</h4>
+                    <p className="text-gray-400 text-xs">diptikumari12</p>
+                  </div>
+                </a>
+              </div>
+
+              <div className="w-full lg:w-2/3 border border-white/10 border-dashed p-8 md:p-12 relative bg-black/40 backdrop-blur-sm">
+                <form action="https://api.web3forms.com/submit" method="POST" className="space-y-8">
+                  {/* Web3Forms required hidden inputs */}
+                  <input type="hidden" name="access_key" value="73fd06cb-4068-479b-8236-b2058e6cc40a" />
+                  <input type="hidden" name="subject" value="New Submission from Portfolio" />
+                  <input type="hidden" name="from_name" value="Portfolio Notification" />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Name</label>
+                      <input type="text" name="name" required className="w-full bg-transparent border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-purple-500 transition-all placeholder:text-gray-700 font-medium text-base md:text-lg" placeholder="Your Name" />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Email</label>
+                      <input type="email" name="email" required className="w-full bg-transparent border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-purple-500 transition-all placeholder:text-gray-700 font-medium text-base md:text-lg" placeholder="your.email@example.com" />
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest">Message</label>
+                    <textarea name="message" required rows={4} className="w-full bg-transparent border-b border-white/20 px-0 py-3 text-white focus:outline-none focus:border-purple-500 transition-all resize-none placeholder:text-gray-700 font-medium text-base md:text-lg" placeholder="Hello, I would like to discuss a project..." />
+                  </div>
+                  <div className="pt-4 flex flex-col md:flex-row items-center justify-end gap-4">
+                    <button 
+                      type="submit"
+                      className="w-full md:w-auto bg-white text-black font-extrabold tracking-widest text-sm px-10 py-4 uppercase hover:bg-purple-400 hover:text-white transition-colors duration-300"
+                    >
+                      Send Message
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
         </motion.section>
 
         {/* FOOTER */}
@@ -549,6 +860,6 @@ export default function Portfolio() {
           </div>
         </footer>
       </div>
-    </main>
+    </div>
   );
 }
