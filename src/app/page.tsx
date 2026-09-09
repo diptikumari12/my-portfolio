@@ -7,83 +7,6 @@ import { useState, useEffect } from "react";
 
 
 
-// Ultra-Premium Interactive Aura & Spotlight
-function InteractiveAura() {
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
-  
-  const springConfig = { damping: 25, stiffness: 200, mass: 0.5 };
-  const cursorXSpring = useSpring(cursorX, springConfig);
-  const cursorYSpring = useSpring(cursorY, springConfig);
-
-  const [isHovering, setIsHovering] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const moveCursor = (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
-      if (!isVisible) setIsVisible(true);
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName.toLowerCase() === 'a' ||
-        target.tagName.toLowerCase() === 'button' ||
-        target.closest('a') ||
-        target.closest('button') ||
-        target.closest('.group')
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    const handleMouseLeave = () => setIsVisible(false);
-    const handleMouseEnter = () => setIsVisible(true);
-
-    window.addEventListener("mousemove", moveCursor);
-    window.addEventListener("mouseover", handleMouseOver);
-    document.addEventListener("mouseleave", handleMouseLeave);
-    document.addEventListener("mouseenter", handleMouseEnter);
-
-    return () => {
-      window.removeEventListener("mousemove", moveCursor);
-      window.removeEventListener("mouseover", handleMouseOver);
-      document.removeEventListener("mouseleave", handleMouseLeave);
-      document.removeEventListener("mouseenter", handleMouseEnter);
-    };
-  }, [cursorX, cursorY, isVisible]);
-
-  return (
-    <>
-      {/* Trailing glowing ring */}
-      <motion.div
-        className={`hidden md:block fixed top-0 left-0 rounded-full pointer-events-none z-[9999] border transition-all duration-300 ${isHovering ? 'w-20 h-20 bg-purple-500/20 border-purple-400/80 blur-[1px] scale-125' : 'w-12 h-12 border-cyan-500/40 bg-transparent scale-100'}`}
-        style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
-          translateX: "-50%",
-          translateY: "-50%",
-          opacity: isVisible ? 1 : 0
-        }}
-      />
-      {/* Global Spotlight Effect */}
-      <motion.div
-        className="hidden md:block fixed top-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full pointer-events-none z-[1] blur-[120px] transition-opacity duration-500 mix-blend-screen"
-        style={{
-          x: cursorXSpring,
-          y: cursorYSpring,
-          translateX: "-50%",
-          translateY: "-50%",
-          opacity: isVisible ? 1 : 0
-        }}
-      />
-    </>
-  );
-}
 
 
 
@@ -634,7 +557,7 @@ export default function Portfolio() {
                 whileHover={{ rotateX: 10, rotateY: -10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
                 transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
               >
-                <Image src="/goverdhan.png" alt="Goverdhan Food Product" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/goverdhan.png" alt="Goverdhan Food Product" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
               </motion.div>
             </div>
 
@@ -690,7 +613,7 @@ export default function Portfolio() {
                 whileHover={{ rotateX: 10, rotateY: 10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
                 transition={{ y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
               >
-                <Image src="/slangera.png" alt="Slang Era Marketing" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/slangera.png" alt="Slang Era Marketing" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
               </motion.div>
             </div>
 
