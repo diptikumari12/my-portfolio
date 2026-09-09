@@ -235,7 +235,7 @@ export default function Portfolio() {
             </motion.h2>
             
             <motion.h1 
-              className="text-6xl md:text-[4.5rem] lg:text-[5.5rem] font-black tracking-tight leading-[0.9] text-white drop-shadow-lg mb-6"
+              className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight leading-[0.9] text-white drop-shadow-lg mb-6"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
