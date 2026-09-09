@@ -245,7 +245,7 @@ export default function Portfolio() {
         transition={{ duration: 8, repeat: Infinity, delay: 4 }}
       />
 
-      <div className="max-w-6xl mx-auto px-6 pt-32 relative z-10" style={{ transformStyle: "preserve-3d" }}>
+      <div className="max-w-6xl mx-auto px-6 md:pl-[104px] lg:pl-[104px] xl:px-6 pt-32 relative z-10" style={{ transformStyle: "preserve-3d" }}>
         
         {/* HERO SECTION */}
         <motion.section 
@@ -267,7 +267,7 @@ export default function Portfolio() {
             </motion.h2>
             
             <motion.h1 
-              className="text-6xl md:text-[5.5rem] font-black tracking-tight leading-[0.9] text-white drop-shadow-lg mb-6"
+              className="text-6xl md:text-[4.5rem] lg:text-[5.5rem] font-black tracking-tight leading-[0.9] text-white drop-shadow-lg mb-6"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
