@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useSpring, useMotionValue, useTransform } from "framer-motion";
+import { motion, useScroll, useSpring } from "framer-motion";
 import { Code, Globe, Mail, Menu, X, Award } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -90,7 +90,6 @@ function InteractiveAura() {
 export default function Portfolio() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   
   // Scroll Progress
   const { scrollYProgress } = useScroll();
@@ -102,7 +101,6 @@ export default function Portfolio() {
 
   // Handle Navbar Background and Mount
   useEffect(() => {
-    setIsMounted(true);
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
