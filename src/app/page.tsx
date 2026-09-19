@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useScroll, useSpring } from "framer-motion";
+import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
 import { Code, Globe, Mail, Menu, X, Award } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
@@ -13,6 +13,9 @@ import { useState, useEffect } from "react";
 export default function Portfolio() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [showLoader, setShowLoader] = useState(true);
+  const [loadingText, setLoadingText] = useState("Loading...");
   
   // Scroll Progress
   const { scrollYProgress } = useScroll();
@@ -24,11 +27,26 @@ export default function Portfolio() {
 
   // Handle Navbar Background and Mount
   useEffect(() => {
+    setIsMounted(true);
+    
+    // Loading animation sequence
+    const textTimer = setTimeout(() => {
+      setLoadingText("Welcome");
+    }, 1500);
+
+    const hideTimer = setTimeout(() => {
+      setShowLoader(false);
+    }, 3000);
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(textTimer);
+      clearTimeout(hideTimer);
+    };
   }, []);
 
   const fadeIn = {
@@ -48,6 +66,44 @@ export default function Portfolio() {
   return (
     <div className="bg-[#0a0a0a] min-h-screen text-white font-sans selection:bg-purple-500/30 relative overflow-x-hidden">
       
+      {/* INITIAL LOADING SCREEN */}
+      <AnimatePresence>
+        {isMounted && showLoader && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, y: "-100vh" }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 flex flex-col items-center justify-center bg-black"
+            style={{ zIndex: 99999 }}
+          >
+            <motion.h1
+              key={loadingText}
+              initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="text-4xl md:text-6xl font-black text-white tracking-[0.3em] uppercase drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+            >
+              {loadingText}
+            </motion.h1>
+            {loadingText === "Loading..." && (
+              <motion.div 
+                className="mt-8 w-48 h-1 bg-white/20 rounded-full overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                <motion.div 
+                  className="h-full bg-purple-500 rounded-full"
+                  initial={{ width: "0%" }}
+                  animate={{ width: "100%" }}
+                  transition={{ duration: 1.5, ease: "easeInOut" }}
+                />
+              </motion.div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
       
       {/* Progress Bar */}
       <motion.div 
@@ -470,27 +526,6 @@ export default function Portfolio() {
           </div>
 
           <div className="max-w-4xl mx-auto space-y-8">
-            {/* Exp 1 */}
-            <motion.div 
-              animate={{ y: [-5, 5, -5] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-purple-500/50 transition-colors"
-            >
-              <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-                <div>
-                  <h3 className="text-2xl font-bold text-white">UI/UX Design Intern</h3>
-                  <p className="text-purple-400 font-medium tracking-wide">Casa Chic Interiors</p>
-                </div>
-                <div className="mt-2 md:mt-0 px-4 py-1 bg-white/10 text-white text-sm rounded-full w-max">
-                  2026 - Present
-                </div>
-              </div>
-              <ul className="list-disc list-inside text-gray-400 space-y-2 mt-4 text-sm md:text-base leading-relaxed">
-                <li>Designed intuitive and engaging user interfaces for client websites using Figma.</li>
-                <li>Created high-fidelity wireframes and interactive prototypes for cross-functional teams.</li>
-                <li>Collaborated with developers to ensure seamless translation of designs into functional frontend components.</li>
-              </ul>
-            </motion.div>
 
             {/* Exp 2 */}
             <motion.div 
