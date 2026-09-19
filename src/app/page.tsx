@@ -231,7 +231,7 @@ export default function Portfolio() {
               </h3>
               
               <p className="text-gray-400 text-sm md:text-base leading-relaxed font-light">
-                BCA graduate pursuing MCA at Chandigarh University, with hands-on experience in full-stack web development and UI/UX design.
+                BCA graduate pursuing MCA at Chandigarh University, with hands-on experience in full-stack web development.
               </p>
               
               {/* Sleek Integrated Action Bar - Fixes wrapping and looks extremely premium */}
@@ -477,7 +477,7 @@ export default function Portfolio() {
                   </div>
                   <div className="bg-white/5 p-3 rounded-2xl border border-white/5 backdrop-blur-sm col-span-2">
                     <h4 className="text-pink-400 font-bold text-sm">Figma</h4>
-                    <p className="text-gray-500 text-xs">UI/UX Design & Prototyping</p>
+                    <p className="text-gray-500 text-xs">Web Design</p>
                   </div>
                 </div>
               </div>
@@ -503,7 +503,7 @@ export default function Portfolio() {
             <div className="w-full md:w-1/2 space-y-8 relative">
               <div className="border border-white/10 border-dashed p-8 relative bg-white/5 backdrop-blur-sm">
                 <p className="text-gray-300 text-base md:text-lg leading-relaxed">
-                  I am a BCA graduate currently pursuing an MCA at Chandigarh University. With a strong interest in full-stack development, modern web technologies, and UI/UX design, I am passionate about building responsive, user-friendly, and scalable applications. I enjoy tackling complex problems and continually learning new skills to stay at the forefront of web development.
+                  I am a BCA graduate currently pursuing an MCA at Chandigarh University. With a strong interest in full-stack development and modern web technologies, I am passionate about building responsive, user-friendly, and scalable applications. I enjoy tackling complex problems and continually learning new skills to stay at the forefront of web development.
                 </p>
               </div>
             </div>
@@ -586,26 +586,18 @@ export default function Portfolio() {
 
               </div>
               <motion.div 
-                className="mt-auto relative h-48 w-full rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors"
-                style={{ transformStyle: "preserve-3d" }}
-                animate={{ y: [-8, 8, -8] }}
-                whileHover={{ rotateX: 10, rotateY: -10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
-                transition={{ y: { duration: 4, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
+                className="mt-auto relative h-48 w-full rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-all duration-500 hover:scale-105"
               >
-                <Image src="/goverdhan.png" alt="Goverdhan Food Product" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/goverdhan.png" alt="Goverdhan Food Product" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700" />
               </motion.div>
             </div>
 
             {/* Column 2: Food Restro */}
             <div className="px-6 flex flex-col h-full group pt-10 md:pt-0" style={{ perspective: "1000px" }}>
               <motion.div 
-                className="mb-10 w-full relative h-64 rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors"
-                style={{ transformStyle: "preserve-3d" }}
-                animate={{ y: [8, -8, 8] }}
-                whileHover={{ rotateX: -10, rotateY: 10, z: 50, scale: 1.05, boxShadow: "-20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
-                transition={{ y: { duration: 5, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
+                className="mb-10 w-full relative h-64 rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-all duration-500 hover:scale-105"
               >
-                <Image src="/food.jpg" alt="Food Restro" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/food.jpg" alt="Food Restro" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700" />
               </motion.div>
               <div className="flex justify-between items-end mb-10">
                 <h3 className="text-5xl font-light text-white">02</h3>
@@ -642,13 +634,9 @@ export default function Portfolio() {
 
               </div>
               <motion.div 
-                className="mt-auto relative h-64 w-full rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-colors"
-                style={{ transformStyle: "preserve-3d" }}
-                animate={{ y: [-8, 8, -8] }}
-                whileHover={{ rotateX: 10, rotateY: 10, z: 50, scale: 1.05, boxShadow: "20px 20px 40px rgba(168,85,247,0.3)", y: 0 }}
-                transition={{ y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 300, damping: 20 } }}
+                className="mt-auto relative h-64 w-full rounded-lg overflow-hidden border border-white/10 group-hover:border-purple-500/50 transition-all duration-500 hover:scale-105"
               >
-                <Image src="/slangera.png" alt="Slang Era Marketing" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                <Image src="/slangera.png" alt="Slang Era Marketing" unoptimized={true} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700" />
               </motion.div>
             </div>
 
@@ -776,7 +764,7 @@ export default function Portfolio() {
 
         {/* FOOTER */}
         <footer className="text-center py-10 border-t border-white/10 text-muted-foreground text-sm flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
-          <p className="font-medium text-white/50">© 2026 Dipti Kumari. All rights reserved.</p>
+          <p className="font-medium text-white/50">Â© 2026 Dipti Kumari. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="https://github.com/diptikumari12" className="hover:text-white hover:scale-125 transition-all"><Code size={20} /></a>
             <a href="https://linkedin.com/in/dipti-kumari-6032aa39b" className="hover:text-white hover:scale-125 transition-all"><Globe size={20} /></a>
